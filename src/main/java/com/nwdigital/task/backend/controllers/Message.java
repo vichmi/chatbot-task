@@ -1,21 +1,22 @@
 package com.nwdigital.task.backend.controllers;
 
+import java.time.LocalDateTime;
+
 public class Message {
     private String content;
-    private String date;
+    private LocalDateTime date;
     private String sender;
     public Message() {}
-    public Message(String content, String date, String sender) {
+    public Message(String content, String sender) {
         this.content = content;
-        this.date = date;
+        this.date = LocalDateTime.now();
         this.sender = sender;
     }
 
     public String getContent() {return this.content;}
-    public String getDate() {return this.date;}
+    public LocalDateTime getDate() {return this.date;}
     public String getSender() {return this.sender;}
 
     public void setContent(String content) {this.content = content;}
-    public void setDate(String date) {this.date = date;}
     public void setSender(String sender) {this.sender = sender;}
 }
