@@ -7,9 +7,26 @@
     <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
     <script src="app.js" defer></script>
+
+    <style>
+        #new-chat {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    <input type="text" id="username" placeholder="Enter username" />
-    <button type="submit" id="submit-user">Submit</button>
+    <h1>Login</h1>
+    <form id="login-form">
+        <input type="text" name="username" id="login-username" placeholder="Enter username" required />
+        <input type="password" name="password" id="login-password" placeholder="Enter password" required />
+        <input type="submit" value="Sign In" />
+    </form>
+    <h1>Register</h1>
+    <form id="register-form">
+        <input type="text" name="username" id="register-username" placeholder="Enter username" required />
+        <input type="password" name="password" id="register-password" placeholder="Enter password" required />
+        <input type="submit" value="Sign Up" />
+    </form>
+    <h1>Test</h1>
 </body>
 </html>

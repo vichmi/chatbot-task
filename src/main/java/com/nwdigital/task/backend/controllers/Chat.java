@@ -4,12 +4,17 @@ import java.util.ArrayList;
 
 public class Chat {
     private ArrayList<Message> messages;
-    public Chat() {
+    private String name;
+    public Chat(String name) {
+        this.name = name;
     }
 
     public ArrayList<Message> getMessages() {
         return this.messages;
     }
+
+    public String getName() {return this.name;}
+    public void setName(String n) {this.name = n;}
 
     public void setMessages(ArrayList<Message> messages) {
         this.messages = messages;
