@@ -3,7 +3,7 @@
     "start_block_id": "greeting",
     "blocks": [
         {"id": "greeting", "type": "send_message", "message": "Hello, what are you looking for today?", "nextBlock": "wait_response_1"},
-        {"id": "wait_response_1", "type": "wait_response", "nextBlock": "recognize_intent1"},
+        {"id": "wait_response_1", "type": "wait_response", "nextBlock": "recognize_intent_1"},
         {
             "id": "recognize_intent_1",
             "type": "recognize_intent",
@@ -16,7 +16,7 @@
         {"id": "weather_response", "type": "send_message", "nextBlock": "ask_again"},
         {"id": "time_response", "type": "send_message", "nextBlock": "ask_again"},
         {"id": "ask_again", "type": "send_message", "message": "Do you need anthing else?", "nextBlock": "wait_response_2"},
-        {"id": "wait_response_2", "type": "wait_response", "nextBlock": "recognize_intent2"},
+        {"id": "wait_response_2", "type": "wait_response", "nextBlock": "recognize_intent_2"},
         {
             "id": "recognize_intent_2",
             "type": "recognize_intent",

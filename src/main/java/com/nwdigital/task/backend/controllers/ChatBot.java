@@ -1,63 +1,169 @@
 package com.nwdigital.task.backend.controllers;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.springframework.stereotype.Service;
 
+import com.nwdigital.task.backend.models.Block;
+import com.nwdigital.task.backend.models.ChatBotFlow;
+import com.nwdigital.task.backend.models.ChatBotRepository;
+
+@Service
 public class ChatBot {
-    private String name;
-    private JSONObject flow;
-    private String currentNode;
+    private final ChatBotRepository flowRepo;
+    private final Map<String, String> userStates = new HashMap<>();
 
-    public ChatBot(JSONObject flow) {
-        this.name = "ChatBot";
-        this.flow = flow;
-        this.currentNode = this.flow.getString("start_block_id");
+    public ChatBot(ChatBotRepository flowRepo) {
+        this.flowRepo = flowRepo;
     }
 
-    public void start() {
-        JSONArray blocks = this.flow.getJSONArray("blocks");
-        Map<String, JSONObject> blockMap = new HashMap<>();
+    public String processMessage(String userId, String userMessage) {
+        ChatBotFlow flow = flowRepo.findAll().get(0);
+        String currentBlockId = userStates.getOrDefault(userId, flow.getStart_block_id());
+        Block block = flow.getBlocks().stream()
+            .filter(b -> currentBlockId.equals(b.getId()))
+            .findFirst()
+            .orElseThrow();
 
-        for(int i=0;i<blocks.length();i++) {
-            JSONObject block = blocks.getJSONObject(i);
-            blockMap.put(block.getString("id"), block);
+        System.out.println("=== Process Message ===");
+        System.out.println("User: " + userId);
+        System.out.println("Message: '" + userMessage + "'");
+        System.out.println("Current Block: " + currentBlockId);
+        System.out.println("Block Type: " + block.getType());
+
+        return processBlock(userId, block, userMessage, flow);
+    }
+    
+    private String processBlock(String userId, Block block, String userMessage, ChatBotFlow flow) {
+        if(block.getType().equals("send_message")) {
+            return handleSendMessage(userId, block, flow, userMessage);
         }
-
-        while(!this.currentNode.equals("end")) {
-            JSONObject block = blockMap.get(this.currentNode);
-            String type = block.getString("type");
-
-            if(type.equals("send_message")) {
-                // ws sends here based on block.message
-            }else if(type.equals("wait_response")) {
-                // bot waits for the response of the user
-            }else if(type.equals("recognize_intent")) {
-                JSONArray intents = block.getJSONArray("intents");
-                JSONObject branches = block.getJSONObject("branches");
-                String usermsg = "";
-                for(int i=0;i<intents.length();i++) {
-                    String intent = intents.getString(i);
-                    if(usermsg.contains(intent)) {
-                        this.currentNode = branches.getString(intent);
-                    }
+        else if(block.getType().equals("wait_response")) {
+            return handleWaitForResponse(userId, block, flow, userMessage);
+        }
+        else if(block.getType().equals("recognize_intent")) {
+            return handleRecognizeIntent(userId, block, flow, userMessage);
+        }
+        else if(block.getType().equals("end")) {
+            return handleEnd(userId, block);
+        }
+        return "Unknown block type: " + block.getType();
+    }
+    
+    private String handleSendMessage(String userId, Block block, ChatBotFlow flow, String userMessage) {
+        String response = getDynamicMessage(block);
+        if(block.getNextBlock() != null) {
+            userStates.put(userId, block.getNextBlock());
+            System.out.println("Updated state to: " + block.getNextBlock());
+            
+            Block nextBlock = getBlockById(flow, block.getNextBlock());
+            if(nextBlock != null) {
+                if(nextBlock.getType().equals("send_message")) {
+                    return response + "\n" + processBlock(userId, nextBlock, userMessage, flow);
                 }
-            }else{
-                // Something went wrong
+                else if(nextBlock.getType().equals("wait_response")) {
+                    return response;
+                }
+                else {
+                    return response + "\n" + processBlock(userId, nextBlock, userMessage, flow);
+                }
             }
-
         }
+        
+        return response;
     }
 
-    public JSONObject getFlow() {
-        return this.flow;
+    private String getDynamicMessage(Block block) {
+        String blockId = block.getId();
+        if(blockId.equals("time_response")) {
+            LocalDateTime now = LocalDateTime.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a");
+            return "Time is: " + now.format(formatter);
+        }else if(blockId.equals("weather_response")) {
+            return "20 degreese";
+        }
+        return block.getMessage();
+    }
+    
+    private String handleWaitForResponse(String userId, Block block, ChatBotFlow flow, String userMessage) {
+        if(userMessage == null || userMessage.trim().isEmpty()) {
+            System.out.println("Waiting for user response...");
+            return "";
+        }
+        System.out.println("User responded: '" + userMessage + "'");
+        if(block.getNextBlock() != null) {
+            userStates.put(userId, block.getNextBlock());
+            System.out.println("Updated state to: " + block.getNextBlock());
+            
+            Block nextBlock = getBlockById(flow, block.getNextBlock());
+            if(nextBlock != null) {
+                return processBlock(userId, nextBlock, userMessage, flow);
+            }
+        }
+        return "No next block";
+    }
+    
+    private String handleRecognizeIntent(String userId, Block block, ChatBotFlow flow, String userMessage) {
+        if(userMessage == null || userMessage.trim().isEmpty()) {
+            return "error expected message";
+        }
+
+        System.out.println("Recognizing intent from: '" + userMessage + "'");
+        String nextBlockId = detectIntent(block, userMessage);
+        System.out.println("Detected next block: " + nextBlockId);
+
+        userStates.put(userId, nextBlockId);
+        Block nextBlock = getBlockById(flow, nextBlockId);
+        if(nextBlock != null) {
+            return processBlock(userId, nextBlock, userMessage, flow);
+        }
+
+        return "error couldnt find: " + nextBlockId;
     }
 
-    public void setFlow(JSONObject flow) {
-        this.flow = flow;
+    private String detectIntent(Block block, String userMessage) {
+        if(block.getIntents() == null || block.getBranches() == null) {
+            return block.getNextBlock() != null ? block.getNextBlock() : "end";
+        }
+        String lowerMessage = userMessage.toLowerCase().trim();
+
+        for(String intent: block.getIntents()) {
+            if(lowerMessage.contains(intent.toLowerCase())) {
+                String branchBlockId = block.getBranches().get(intent);
+                if(branchBlockId != null) {
+                    System.out.println("✓ Matched intent: " + intent + " -> " + branchBlockId);
+                    return branchBlockId;
+                }
+            }
+        }
+        
+        String defaultNext = block.getNextBlock() != null ? block.getNextBlock() : "end";
+        System.out.println("✗ No intent matched, using default: " + defaultNext);
+        return defaultNext;
     }
 
-    public String getName() {return this.name;}
+    private String handleEnd(String userId, Block block) {
+        System.out.println("Conversation ended for: " + userId);
+        userStates.remove(userId);
+        return block.getMessage() != null ? block.getMessage() : "Goodbye!";
+    }
+
+    private Block getBlockById(ChatBotFlow flow, String blockId) {
+        return flow.getBlocks().stream()
+            .filter(b -> blockId.equals(b.getId()))
+            .findFirst()
+            .orElse(null);
+    }
+
+    public String getCurrentBlockId(String userId) {
+        return userStates.get(userId);
+    }
+    
+    public void resetUser(String userId) {
+        userStates.remove(userId);
+    }
 }

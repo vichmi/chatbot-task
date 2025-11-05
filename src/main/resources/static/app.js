@@ -1,42 +1,33 @@
-const handleLoginAndRegister = (type) => {
-    const username = document.getElementById(`${type}-username`).value;
-    const password = document.getElementById(`${type}-password`).value;
-    console.log(type);
-    fetch(`/${type}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({username, password})
-    })
-    .then(res => {
-        console.log(res.body);
-        if(type == 'login' && res.ok) {
-            window.location.href ='/chat.html';
-        }
-    })
-};
+const userMsg = document.createElement('span');
+const botMsg = document.createElement('span');
 
-document.getElementById('login-form').addEventListener("submit", e => {e.preventDefault(); handleLoginAndRegister('login')})
-document.getElementById('register-form').addEventListener("submit", e => {e.preventDefault(); handleLoginAndRegister('register')})
+let username = '';
+function createChat() {
+    username = document.getElementById("username").value;
+    if(username.length == 0) {return;}
+    stompClient.activate();
 
+}
+document.getElementById('sendMessage').addEventListener('click', e => {
+    const messageContent = document.getElementById('msg-box').value;
+    stompClient.publish({destination: '/app/chat', body: JSON.stringify({content: messageContent, sender: username})});
+});
 
 const stompClient = new StompJs.Client({
     brokerURL: 'ws://localhost:8081/chat'
 });
-
 stompClient.onConnect = frame => {
     console.log('Connected ' + frame);
-    stompClient.subscribe('/topic/welcome', msg => {
-        console.log('asd')
-        console.log(msg.body);
-    })
-    stompClient.subscribe('/topic/createChat', chat => {
-        console.log(chat);
+    document.getElementsByClassName('container')[0].style.display = 'flex';
+    document.getElementById('username-form').style.display = 'none';
+    
+    stompClient.subscribe('/topic/message', val => {
+        const message = JSON.parse(val.body).content;
+        const msgel = document.createElement('span');
+        msgel.innerText = "BOT: " +message;
+        document.getElementById('messages').appendChild(msgel);
     })
 };
-
-
 stompClient.onWebSocketError = (error) => {
     console.error('Error with websocket', error);
 };
@@ -45,5 +36,3 @@ stompClient.onStompError = (frame) => {
     console.error('Broker reported error: ' + frame.headers['message']);
     console.error('Additional details: ' + frame.body);
 };
-
-stompClient.activate();

@@ -1,6 +1,5 @@
 package com.nwdigital.task.backend.models;
-
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.annotation.Id;
@@ -12,7 +11,7 @@ public class ChatBotFlow {
     private String id;
     private String name;
     private String start_block_id;
-    ArrayList<Map<String, Object>> blocks;
+    private List<Block> blocks;
 
     public String getId() {return this.id;}
     public void setId(String id) {this.id = id;}
@@ -21,6 +20,6 @@ public class ChatBotFlow {
     public String getStart_block_id() {return this.start_block_id;}
     public void setStart_block_id(String start_block_id) {this.start_block_id = start_block_id;}
     
-    public ArrayList<Map<String, Object>> getBlocks() {return this.blocks;}
-    public void setBlocks(ArrayList<Map<String, Object>> blocks) {this.blocks = blocks;}
+    public List<Block> getBlocks() {return this.blocks;}
+    public void setBlocks(List<Block> blocks) {this.blocks = blocks;}
 }
