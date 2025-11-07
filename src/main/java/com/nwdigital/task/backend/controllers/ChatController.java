@@ -3,6 +3,7 @@ package com.nwdigital.task.backend.controllers;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -14,16 +15,23 @@ import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
 import com.nwdigital.task.backend.models.ChatBotRepository;
+import com.nwdigital.task.backend.models.ConversationHistory;
+import com.nwdigital.task.backend.models.ConversationHistoryRepository;
+import com.nwdigital.task.backend.models.Message;
+import com.nwdigital.task.backend.services.ChatBotService;
 
 @Controller
 public class ChatController {
 
-    private final ChatBot chatBot;
+    private final ChatBotService chatBot;
     private final SimpMessagingTemplate messaginTemplate;
 
     private final Map<String, String> sessionToUsername = new ConcurrentHashMap<>();
 
-    public ChatController(ChatBot chatBot, SimpMessagingTemplate messaginTemplate) {
+    @Autowired
+    private ConversationHistoryRepository conversationHistoryRepository;
+
+    public ChatController(ChatBotService chatBot, SimpMessagingTemplate messaginTemplate) {
         this.chatBot = chatBot;
         this.messaginTemplate = messaginTemplate;
     }
@@ -52,11 +60,7 @@ public class ChatController {
     @SendTo("/topic/message")
     public Message handleChat(Message msg, SimpMessageHeaderAccessor headerAccessor) {
         String sessionId = headerAccessor.getSessionId();
-
-        System.out.println(msg.getSender());
         String botReply = this.chatBot.processMessage(sessionId, msg.getContent());
-        System.out.println("BOT REPLY:");
-        System.out.println(botReply);
         return new Message(botReply, "bot");
     }
 

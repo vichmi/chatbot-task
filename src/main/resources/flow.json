@@ -13,7 +13,7 @@
                 "time": "time_response"
             }
         },
-        {"id": "weather_response", "type": "send_message", "nextBlock": "ask_again"},
+        {"id": "weather_response", "type": "send_message", "nextBlock": "ask_again", "message": "Light rain, 20 degrees"},
         {"id": "time_response", "type": "send_message", "nextBlock": "ask_again"},
         {"id": "ask_again", "type": "send_message", "message": "Do you need anthing else?", "nextBlock": "wait_response_2"},
         {"id": "wait_response_2", "type": "wait_response", "nextBlock": "recognize_intent_2"},

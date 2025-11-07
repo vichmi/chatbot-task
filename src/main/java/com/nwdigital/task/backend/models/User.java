@@ -5,13 +5,10 @@ import java.util.ArrayList;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.nwdigital.task.backend.controllers.Chat;
-
 @Document(collection = "users")
 public class User {
     @Id
     private String id;
-    private ArrayList<Chat> chats;
 
     private String username;
     private String password;
@@ -23,7 +20,6 @@ public class User {
     }
 
     public String getUsername() {return this.username;}
-    public ArrayList<Chat> getChats() {return this.chats;}
     public void setUsername(String username) {this.username = username;}
     public String getId() {return this.id;}
 

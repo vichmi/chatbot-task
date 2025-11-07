@@ -1,4 +1,4 @@
-package com.nwdigital.task.backend.controllers;
+package com.nwdigital.task.backend.models;
 
 import java.time.LocalDateTime;
 

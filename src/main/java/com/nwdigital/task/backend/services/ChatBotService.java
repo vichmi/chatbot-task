@@ -1,4 +1,4 @@
-package com.nwdigital.task.backend.controllers;
+package com.nwdigital.task.backend.services;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -6,18 +6,25 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.nwdigital.task.backend.models.Block;
 import com.nwdigital.task.backend.models.ChatBotFlow;
 import com.nwdigital.task.backend.models.ChatBotRepository;
+import com.nwdigital.task.backend.models.ConversationHistory;
+import com.nwdigital.task.backend.models.ConversationHistoryRepository;
+import com.nwdigital.task.backend.models.Message;
 
 @Service
-public class ChatBot {
+public class ChatBotService {
     private final ChatBotRepository flowRepo;
     private final Map<String, String> userStates = new HashMap<>();
 
-    public ChatBot(ChatBotRepository flowRepo) {
+    @Autowired
+    private ConversationHistoryRepository conversationHistoryRepository;
+
+    public ChatBotService(ChatBotRepository flowRepo) {
         this.flowRepo = flowRepo;
     }
 
@@ -28,13 +35,8 @@ public class ChatBot {
             .filter(b -> currentBlockId.equals(b.getId()))
             .findFirst()
             .orElseThrow();
-
-        System.out.println("=== Process Message ===");
-        System.out.println("User: " + userId);
-        System.out.println("Message: '" + userMessage + "'");
-        System.out.println("Current Block: " + currentBlockId);
-        System.out.println("Block Type: " + block.getType());
-
+        Message usrMsg = new Message(userMessage, userId);
+        conversationHistoryRepository.insert(new ConversationHistory(usrMsg, block));
         return processBlock(userId, block, userMessage, flow);
     }
     
@@ -50,17 +52,17 @@ public class ChatBot {
         }
         else if(block.getType().equals("end")) {
             return handleEnd(userId, block);
-        }
-        return "Unknown block type: " + block.getType();
+        }else if(block.getType().equals("misunderstood")) {return handleMisUnderstand(userId, block);}
+        return "Unknown block" + block.getType();
     }
     
     private String handleSendMessage(String userId, Block block, ChatBotFlow flow, String userMessage) {
         String response = getDynamicMessage(block);
         if(block.getNextBlock() != null) {
             userStates.put(userId, block.getNextBlock());
-            System.out.println("Updated state to: " + block.getNextBlock());
             
             Block nextBlock = getBlockById(flow, block.getNextBlock());
+            conversationHistoryRepository.insert(new ConversationHistory(new Message(response, "bot"), nextBlock));
             if(nextBlock != null) {
                 if(nextBlock.getType().equals("send_message")) {
                     return response + "\n" + processBlock(userId, nextBlock, userMessage, flow);
@@ -84,20 +86,17 @@ public class ChatBot {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a");
             return "Time is: " + now.format(formatter);
         }else if(blockId.equals("weather_response")) {
-            return "20 degreese";
+            return block.getMessage();
         }
         return block.getMessage();
     }
     
     private String handleWaitForResponse(String userId, Block block, ChatBotFlow flow, String userMessage) {
         if(userMessage == null || userMessage.trim().isEmpty()) {
-            System.out.println("Waiting for user response...");
             return "";
         }
-        System.out.println("User responded: '" + userMessage + "'");
         if(block.getNextBlock() != null) {
             userStates.put(userId, block.getNextBlock());
-            System.out.println("Updated state to: " + block.getNextBlock());
             
             Block nextBlock = getBlockById(flow, block.getNextBlock());
             if(nextBlock != null) {
@@ -109,20 +108,21 @@ public class ChatBot {
     
     private String handleRecognizeIntent(String userId, Block block, ChatBotFlow flow, String userMessage) {
         if(userMessage == null || userMessage.trim().isEmpty()) {
-            return "error expected message";
+            return "expected message";
         }
 
-        System.out.println("Recognizing intent from: '" + userMessage + "'");
         String nextBlockId = detectIntent(block, userMessage);
-        System.out.println("Detected next block: " + nextBlockId);
 
-        userStates.put(userId, nextBlockId);
-        Block nextBlock = getBlockById(flow, nextBlockId);
-        if(nextBlock != null) {
-            return processBlock(userId, nextBlock, userMessage, flow);
+        if(nextBlockId == null) {
+            return handleMisUnderstand(userId, block);
         }
+        Block nextBlock = getBlockById(flow, nextBlockId);
 
-        return "error couldnt find: " + nextBlockId;
+        if(nextBlock == null) {
+            return handleMisUnderstand(userId, block);
+        }
+        userStates.put(userId, nextBlockId);
+        return processBlock(userId, nextBlock, userMessage, flow);
     }
 
     private String detectIntent(Block block, String userMessage) {
@@ -135,19 +135,24 @@ public class ChatBot {
             if(lowerMessage.contains(intent.toLowerCase())) {
                 String branchBlockId = block.getBranches().get(intent);
                 if(branchBlockId != null) {
-                    System.out.println("✓ Matched intent: " + intent + " -> " + branchBlockId);
                     return branchBlockId;
                 }
             }
         }
         
-        String defaultNext = block.getNextBlock() != null ? block.getNextBlock() : "end";
-        System.out.println("✗ No intent matched, using default: " + defaultNext);
-        return defaultNext;
+        return null;
+    }
+
+    private String handleMisUnderstand(String userId, Block block) {
+
+        userStates.put(userId, block.getId());
+
+        conversationHistoryRepository.insert(new ConversationHistory(new Message("I didn't understand that.", "bot"), block));
+
+        return "I didn't get that. Can you try again?";
     }
 
     private String handleEnd(String userId, Block block) {
-        System.out.println("Conversation ended for: " + userId);
         userStates.remove(userId);
         return block.getMessage() != null ? block.getMessage() : "Goodbye!";
     }

@@ -1,4 +1,4 @@
-package com.nwdigital.task.backend;
+package com.nwdigital.task.backend.config;
 
 import java.util.Map;
 
