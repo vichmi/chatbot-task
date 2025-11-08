@@ -3,7 +3,6 @@ package com.nwdigital.task.backend.controllers;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -11,12 +10,8 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
-import com.nwdigital.task.backend.models.ChatBotRepository;
-import com.nwdigital.task.backend.models.ConversationHistory;
-import com.nwdigital.task.backend.models.ConversationHistoryRepository;
 import com.nwdigital.task.backend.models.Message;
 import com.nwdigital.task.backend.services.ChatBotService;
 
@@ -27,9 +22,6 @@ public class ChatController {
     private final SimpMessagingTemplate messaginTemplate;
 
     private final Map<String, String> sessionToUsername = new ConcurrentHashMap<>();
-
-    @Autowired
-    private ConversationHistoryRepository conversationHistoryRepository;
 
     public ChatController(ChatBotService chatBot, SimpMessagingTemplate messaginTemplate) {
         this.chatBot = chatBot;

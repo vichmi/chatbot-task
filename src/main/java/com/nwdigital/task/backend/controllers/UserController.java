@@ -1,25 +1,15 @@
 package com.nwdigital.task.backend.controllers;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.WebSession;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.nwdigital.task.backend.models.User;
 import com.nwdigital.task.backend.models.UserRepository;
-
-import reactor.core.publisher.Mono;
 
 @RestController
 public class UserController {

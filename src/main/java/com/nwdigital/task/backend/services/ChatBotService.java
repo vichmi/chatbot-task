@@ -1,13 +1,23 @@
 package com.nwdigital.task.backend.services;
 
+import org.springframework.http.*;
+
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import com.nwdigital.task.backend.models.Block;
 import com.nwdigital.task.backend.models.ChatBotFlow;
@@ -20,12 +30,17 @@ import com.nwdigital.task.backend.models.Message;
 public class ChatBotService {
     private final ChatBotRepository flowRepo;
     private final Map<String, String> userStates = new HashMap<>();
+    private String lastQuestion;
+
+    @Value("${OPENAI_SECRETKEY}")
+    private String OPENAI_SECRETKEY;
 
     @Autowired
     private ConversationHistoryRepository conversationHistoryRepository;
 
     public ChatBotService(ChatBotRepository flowRepo) {
         this.flowRepo = flowRepo;
+        this.lastQuestion = "";
     }
 
     public String processMessage(String userId, String userMessage) {
@@ -71,11 +86,12 @@ public class ChatBotService {
                     return response;
                 }
                 else {
+                    // this.lastQuestion = response + "\n" + processBlock(userId, nextBlock, userMessage, flow); 
                     return response + "\n" + processBlock(userId, nextBlock, userMessage, flow);
                 }
             }
         }
-        
+        this.lastQuestion = response;
         return response;
     }
 
@@ -131,17 +147,44 @@ public class ChatBotService {
         }
         String lowerMessage = userMessage.toLowerCase().trim();
 
-        for(String intent: block.getIntents()) {
-            if(lowerMessage.contains(intent.toLowerCase())) {
-                String branchBlockId = block.getBranches().get(intent);
-                if(branchBlockId != null) {
-                    return branchBlockId;
-                }
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.set("Authorization", "Bearer "+OPENAI_SECRETKEY);
+        headers.set("Content-Type", "application/json");
+        // System.out.printf("You are a highly inteligent assistant and your task is to give me the name of the intent the user wants(only the word as in the array and nothing else). If you can't find the intent return 'misunderstood'. Here is the bot's question: '%s'.  Here are the intents as List: '%s.' Here is a user input message", this.lastQuestion, block.getIntents());
+        String intentsStr = String.join(", ", block.getIntents());
+        System.out.println(intentsStr);
+        String requestBodyRaw = """
+            {
+                "model": "gpt-3.5-turbo",
+                "messages": [
+                    {"role": "system", "content": "You are a chatbot. When you cannot recognize the user's intent from the message, return 'misunderstood'. Here are the available intents: %s"},
+                    {"role": "assistant", "content": "%s"},
+                    {"role": "user", "content": "%s"}
+                ]
             }
+        """.formatted(intentsStr, this.lastQuestion, lowerMessage);
+
+        byte[] bytes = requestBodyRaw.getBytes(StandardCharsets.UTF_8);
+        String requestBody = new String(bytes, StandardCharsets.UTF_8);
+
+        System.out.println(requestBody);
+
+        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange("https://api.openai.com/v1/chat/completions", HttpMethod.POST, entity, String.class);
+        JSONObject resBody = new JSONObject(response.getBody());
+        JSONArray choices = resBody.getJSONArray("choices");
+        String openaiIntent = choices.getJSONObject(0).getJSONObject("message").getString("content");
+        System.out.println(response.getBody());
+        String branchBlockId = block.getBranches().get(openaiIntent);
+        if(branchBlockId != null) {
+            return branchBlockId;
         }
-        
         return null;
     }
+
+
 
     private String handleMisUnderstand(String userId, Block block) {
 
@@ -171,4 +214,6 @@ public class ChatBotService {
     public void resetUser(String userId) {
         userStates.remove(userId);
     }
+
+    public String getLastQuestion() {return this.lastQuestion;}
 }
