@@ -1,0 +1,33 @@
+{
+    "name": "Chat Bot3",
+    "start_block_id": "greeting",
+    "blocks": [
+        {"id": "greeting", "type": "send_message", "message": "Hello, what are you looking for today?", "nextBlock": "wait_response_1"},
+        {"id": "wait_response_1", "type": "wait_response", "nextBlock": "recognize_intent_1"},
+        {
+            "id": "recognize_intent_1",
+            "type": "recognize_intent",
+            "intents": ["weather", "time"],
+            "branches": {
+                "weather": "weather_response",
+                "time": "time_response"
+            }
+        },
+        {"id": "weather_response", "type": "send_message", "nextBlock": "ask_again", "message": "Light rain, 20 degrees"},
+        {"id": "time_response", "type": "send_message", "nextBlock": "ask_again"},
+        {"id": "ask_again", "type": "send_message", "message": "Do you need anthing else?", "nextBlock": "wait_response_2"},
+        {"id": "wait_response_2", "type": "wait_response", "nextBlock": "recognize_intent_2"},
+        {
+            "id": "recognize_intent_2",
+            "type": "recognize_intent",
+            "intents": ["yes", "no"],
+            "branches": {
+                "yes": "yes_response",
+                "no": "no_response"
+            }
+        },
+        {"id": "yes_response", "type": "send_message", "message": "Ok, let me know what else you need", "nextBlock": "wait_response_1"},
+        {"id": "no_response", "type": "send_message", "message": "Thanks, bye!", "nextBlock": "end"},
+        {"id": "end", "type": "end"}
+    ]
+}

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.nwdigital.task.backend.service.ChatBotServiceTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2025-11-09T19:06:10.926Z" hostname="DESKTOP-FB9ET1M" time="1.557">
+  <properties/>
+  <testcase name="testGetDynamicMessage()" classname="com.nwdigital.task.backend.service.ChatBotServiceTest" time="0.003"/>
+  <testcase name="testHandleSendMessage()" classname="com.nwdigital.task.backend.service.ChatBotServiceTest" time="0.008"/>
+  <testcase name="setup()" classname="com.nwdigital.task.backend.service.ChatBotServiceTest" time="1.519"/>
+  <testcase name="testGetMethod()" classname="com.nwdigital.task.backend.service.ChatBotServiceTest" time="0.024"/>
+  <system-out><![CDATA[2025-11-09T21:06:10.630+02:00  INFO 24548 --- [backend] [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.nwdigital.task.backend.service.ChatBotServiceTest]: ChatBotServiceTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2025-11-09T21:06:10.641+02:00  INFO 24548 --- [backend] [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.nwdigital.task.backend.MessaginStompWebsocketApplication for test class com.nwdigital.task.backend.service.ChatBotServiceTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.7)
+
+2025-11-09T21:06:10.661+02:00  WARN 24548 --- [backend] [    Test worker] ory$DuplicateJsonObjectContextCustomizer : 
+
+Found multiple occurrences of org.json.JSONObject on the class path:
+
+	jar:file:/C:/Users/Vichmi/.gradle/caches/modules-2/files-2.1/org.json/json/20250517/d67181bbd819ccceb929b580a4e2fcb0c8b17cd8/json-20250517.jar!/org/json/JSONObject.class
+	jar:file:/C:/Users/Vichmi/.gradle/caches/modules-2/files-2.1/com.vaadin.external.google/android-json/0.0.20131108.vaadin1/fa26d351fe62a6a17f5cda1287c1c6110dec413f/android-json-0.0.20131108.vaadin1.jar!/org/json/JSONObject.class
+
+You may wish to exclude one of them to ensure predictable runtime behavior
+
+2025-11-09T21:06:10.662+02:00  INFO 24548 --- [backend] [    Test worker] c.n.t.b.service.ChatBotServiceTest       : Starting ChatBotServiceTest using Java 17.0.17 with PID 24548 (started by Vichmi in F:\Programming\Job\NW digital\backend)
+2025-11-09T21:06:10.663+02:00  INFO 24548 --- [backend] [    Test worker] c.n.t.b.service.ChatBotServiceTest       : The following 1 profile is active: "test"
+2025-11-09T21:06:10.664+02:00 DEBUG 24548 --- [backend] [    Test worker] o.s.w.c.s.GenericWebApplicationContext   : Refreshing org.springframework.web.context.support.GenericWebApplicationContext@41d6d6c4
+2025-11-09T21:06:10.776+02:00  INFO 24548 --- [backend] [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2025-11-09T21:06:10.776+02:00  INFO 24548 --- [backend] [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data MongoDB repositories in DEFAULT mode.
+2025-11-09T21:06:10.786+02:00  INFO 24548 --- [backend] [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 8 ms. Found 2 MongoDB repository interfaces.
+2025-11-09T21:06:10.787+02:00  INFO 24548 --- [backend] [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2025-11-09T21:06:10.787+02:00  INFO 24548 --- [backend] [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-11-09T21:06:10.791+02:00  INFO 24548 --- [backend] [    Test worker] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.nwdigital.task.backend.models.ChatBotRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-11-09T21:06:10.791+02:00  INFO 24548 --- [backend] [    Test worker] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.nwdigital.task.backend.repository.ConversationHistoryRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-11-09T21:06:10.791+02:00  INFO 24548 --- [backend] [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 2 ms. Found 0 Redis repository interfaces.
+2025-11-09T21:06:10.826+02:00  INFO 24548 --- [backend] [    Test worker] org.mongodb.driver.client                : MongoClient with metadata {"driver": {"name": "mongo-java-driver|sync|spring-boot", "version": "5.5.2"}, "os": {"type": "Windows", "name": "Windows 11", "architecture": "amd64", "version": "10.0"}, "platform": "Java/Eclipse Adoptium/17.0.17+10"} created with settings MongoClientSettings{readPreference=primary, writeConcern=WriteConcern{w=null, wTimeout=null ms, journal=null}, retryWrites=true, retryReads=true, readConcern=ReadConcern{level=null}, credential=null, transportSettings=null, commandListeners=[], codecRegistry=ProvidersCodecRegistry{codecProviders=[ValueCodecProvider{}, BsonValueCodecProvider{}, DBRefCodecProvider{}, DBObjectCodecProvider{}, DocumentCodecProvider{}, CollectionCodecProvider{}, IterableCodecProvider{}, MapCodecProvider{}, GeoJsonCodecProvider{}, GridFSFileCodecProvider{}, Jsr310CodecProvider{}, JsonObjectCodecProvider{}, BsonCodecProvider{}, EnumCodecProvider{}, com.mongodb.client.model.mql.ExpressionCodecProvider@2f04993d, com.mongodb.Jep395RecordCodecProvider@333398f, com.mongodb.KotlinCodecProvider@103c97ff]}, loggerSettings=LoggerSettings{maxDocumentLength=1000}, clusterSettings={hosts=[localhost:27017], srvServiceName=mongodb, mode=SINGLE, requiredClusterType=UNKNOWN, requiredReplicaSetName='null', serverSelector='null', clusterListeners='[]', serverSelectionTimeout='30000 ms', localThreshold='15 ms'}, socketSettings=SocketSettings{connectTimeoutMS=10000, readTimeoutMS=0, receiveBufferSize=0, proxySettings=ProxySettings{host=null, port=null, username=null, password=null}}, heartbeatSocketSettings=SocketSettings{connectTimeoutMS=10000, readTimeoutMS=10000, receiveBufferSize=0, proxySettings=ProxySettings{host=null, port=null, username=null, password=null}}, connectionPoolSettings=ConnectionPoolSettings{maxSize=100, minSize=0, maxWaitTimeMS=120000, maxConnectionLifeTimeMS=0, maxConnectionIdleTimeMS=0, maintenanceInitialDelayMS=0, maintenanceFrequencyMS=60000, connectionPoolListeners=[], maxConnecting=2}, serverSettings=ServerSettings{heartbeatFrequencyMS=10000, minHeartbeatFrequencyMS=500, serverMonitoringMode=AUTO, serverListeners='[]', serverMonitorListeners='[]'}, sslSettings=SslSettings{enabled=false, invalidHostNameAllowed=false, context=null}, applicationName='null', compressorList=[], uuidRepresentation=JAVA_LEGACY, serverApi=null, autoEncryptionSettings=null, dnsClient=null, inetAddressResolver=null, contextProvider=null, timeoutMS=null}
+2025-11-09T21:06:10.828+02:00  INFO 24548 --- [backend] [localhost:27017] org.mongodb.driver.cluster               : Monitor thread successfully connected to server with description ServerDescription{address=localhost:27017, type=STANDALONE, cryptd=false, state=CONNECTED, ok=true, minWireVersion=0, maxWireVersion=25, maxDocumentSize=16777216, logicalSessionTimeoutMinutes=30, roundTripTimeNanos=1378200, minRoundTripTimeNanos=0}
+2025-11-09T21:06:10.852+02:00 DEBUG 24548 --- [backend] [    Test worker] o.s.w.s.s.s.WebSocketHandlerMapping      : Patterns [/chat] in 'stompWebSocketHandlerMapping'
+2025-11-09T21:06:10.861+02:00 DEBUG 24548 --- [backend] [    Test worker] .WebSocketAnnotationMethodMessageHandler : 
+	c.n.t.b.c.ChatController:
+	{[MESSAGE],[/chat]}: handleChat(Message,SimpMessageHeaderAccessor)
+2025-11-09T21:06:10.861+02:00 DEBUG 24548 --- [backend] [    Test worker] .WebSocketAnnotationMethodMessageHandler : 
+	c.n.t.b.c.JSONEndpoints:
+	
+2025-11-09T21:06:10.862+02:00 DEBUG 24548 --- [backend] [    Test worker] .WebSocketAnnotationMethodMessageHandler : 
+	o.s.b.a.w.s.e.BasicErrorController:
+	
+2025-11-09T21:06:10.870+02:00  INFO 24548 --- [backend] [    Test worker] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2025-11-09T21:06:10.875+02:00 DEBUG 24548 --- [backend] [    Test worker] s.w.s.m.m.a.RequestMappingHandlerMapping : 4 mappings in 'requestMappingHandlerMapping'
+2025-11-09T21:06:10.881+02:00 DEBUG 24548 --- [backend] [    Test worker] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**] in 'resourceHandlerMapping'
+2025-11-09T21:06:10.885+02:00 DEBUG 24548 --- [backend] [    Test worker] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
+2025-11-09T21:06:10.888+02:00 DEBUG 24548 --- [backend] [    Test worker] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 0 @ExceptionHandler, 1 ResponseBodyAdvice
+2025-11-09T21:06:10.914+02:00  INFO 24548 --- [backend] [    Test worker] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2025-11-09T21:06:10.914+02:00  INFO 24548 --- [backend] [    Test worker] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2025-11-09T21:06:10.915+02:00  INFO 24548 --- [backend] [    Test worker] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2025-11-09T21:06:10.922+02:00 DEBUG 24548 --- [backend] [    Test worker] o.s.m.s.ExecutorSubscribableChannel      : clientOutboundChannel added SubProtocolWebSocketHandler[StompSubProtocolHandler[v10.stomp, v11.stomp, v12.stomp]]
+2025-11-09T21:06:10.923+02:00 DEBUG 24548 --- [backend] [    Test worker] o.s.m.s.ExecutorSubscribableChannel      : clientInboundChannel added WebSocketAnnotationMethodMessageHandler[prefixes=[/app/]]
+2025-11-09T21:06:10.923+02:00  INFO 24548 --- [backend] [    Test worker] o.s.m.s.b.SimpleBrokerMessageHandler     : Starting...
+2025-11-09T21:06:10.923+02:00 DEBUG 24548 --- [backend] [    Test worker] o.s.m.s.ExecutorSubscribableChannel      : clientInboundChannel added SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@3e60be48]
+2025-11-09T21:06:10.923+02:00 DEBUG 24548 --- [backend] [    Test worker] o.s.m.s.ExecutorSubscribableChannel      : brokerChannel added SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@3e60be48]
+2025-11-09T21:06:10.923+02:00  INFO 24548 --- [backend] [    Test worker] o.s.m.s.b.SimpleBrokerMessageHandler     : BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@3e60be48]]
+2025-11-09T21:06:10.923+02:00  INFO 24548 --- [backend] [    Test worker] o.s.m.s.b.SimpleBrokerMessageHandler     : Started.
+2025-11-09T21:06:10.923+02:00 DEBUG 24548 --- [backend] [    Test worker] o.s.m.s.ExecutorSubscribableChannel      : clientInboundChannel added UserDestinationMessageHandler[DefaultUserDestinationResolver[prefix=/user/]]
+2025-11-09T21:06:10.923+02:00 DEBUG 24548 --- [backend] [    Test worker] o.s.m.s.ExecutorSubscribableChannel      : brokerChannel added UserDestinationMessageHandler[DefaultUserDestinationResolver[prefix=/user/]]
+2025-11-09T21:06:10.926+02:00  INFO 24548 --- [backend] [    Test worker] c.n.t.b.service.ChatBotServiceTest       : Started ChatBotServiceTest in 0.282 seconds (process running for 4.87)
+2025-11-09T21:06:10.956+02:00 DEBUG 24548 --- [backend] [    Test worker] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.nwdigital.task.backend.controllers.JSONEndpoints#createConfig(ChatBotFlow)
+2025-11-09T21:06:10.977+02:00 DEBUG 24548 --- [backend] [    Test worker] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [com.nwdigital.task.backend.models.ChatBotFlow@17fbbf0a]
+2025-11-09T21:06:11.014+02:00 DEBUG 24548 --- [backend] [    Test worker] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-11-09T21:06:11.015+02:00 DEBUG 24548 --- [backend] [    Test worker] m.m.a.RequestResponseBodyMethodProcessor : Writing [com.nwdigital.task.backend.models.ChatBotFlow@17fbbf0a]
+2025-11-09T21:06:11.042+02:00 DEBUG 24548 --- [backend] [    Test worker] o.s.web.client.RestTemplate              : HTTP POST https://api.openai.com/v1/chat/completions
+2025-11-09T21:06:11.047+02:00 DEBUG 24548 --- [backend] [    Test worker] o.s.web.client.RestTemplate              : Accept=[text/plain, application/json, application/*+json, */*]
+2025-11-09T21:06:11.048+02:00 DEBUG 24548 --- [backend] [    Test worker] o.s.web.client.RestTemplate              : Writing [    {
+        "model": "gpt-3.5-turbo",
+        "messages": [
+            {"role": "system", "content": "You are a text classfier. Respond with ONE WORD that is the intent the user wants. Here are the available intents: time, weather"},
+            {"role": "assistant", "content": "Hello there!"},
+            {"role": "user", "content": "what is the weather?"}
+        ]
+    }
+] as "application/json"
+2025-11-09T21:06:12.436+02:00 DEBUG 24548 --- [backend] [    Test worker] o.s.web.client.RestTemplate              : Response 200 OK
+2025-11-09T21:06:12.446+02:00 DEBUG 24548 --- [backend] [    Test worker] o.s.web.client.RestTemplate              : Reading to [java.lang.String] as "application/json"
+2025-11-09T21:06:12.478+02:00 DEBUG 24548 --- [backend] [    Test worker] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.nwdigital.task.backend.controllers.JSONEndpoints#getConfig()
+2025-11-09T21:06:12.480+02:00 DEBUG 24548 --- [backend] [    Test worker] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-11-09T21:06:12.480+02:00 DEBUG 24548 --- [backend] [    Test worker] m.m.a.RequestResponseBodyMethodProcessor : Writing [com.nwdigital.task.backend.models.ChatBotFlow@3ae5cbb9]
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

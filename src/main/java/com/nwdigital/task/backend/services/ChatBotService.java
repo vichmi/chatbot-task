@@ -154,9 +154,7 @@ public class ChatBotService {
         HttpHeaders headers = new org.springframework.http.HttpHeaders();
         headers.set("Authorization", "Bearer "+OPENAI_SECRETKEY);
         headers.set("Content-Type", "application/json");
-        // System.out.printf("You are a highly inteligent assistant and your task is to give me the name of the intent the user wants(only the word as in the array and nothing else). If you can't find the intent return 'misunderstood'. Here is the bot's question: '%s'.  Here are the intents as List: '%s.' Here is a user input message", this.lastQuestion, block.getIntents());
         String intentsStr = String.join(", ", block.getIntents());
-        System.out.println(intentsStr);
         String requestBodyRaw = """
             {
                 "model": "gpt-3.5-turbo",
@@ -167,19 +165,18 @@ public class ChatBotService {
                 ]
             }
         """.formatted(intentsStr, this.lastQuestion, lowerMessage);
+        System.out.println("===================");
+        System.out.println(OPENAI_SECRETKEY);
+        System.out.println("===================");
 
         byte[] bytes = requestBodyRaw.getBytes(StandardCharsets.UTF_8);
         String requestBody = new String(bytes, StandardCharsets.UTF_8);
-
-        System.out.println(requestBody);
-
         HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
-
         ResponseEntity<String> response = restTemplate.exchange("https://api.openai.com/v1/chat/completions", HttpMethod.POST, entity, String.class);
         JSONObject resBody = new JSONObject(response.getBody());
         JSONArray choices = resBody.getJSONArray("choices");
         String openaiIntent = choices.getJSONObject(0).getJSONObject("message").getString("content");
-        System.out.println(response.getBody());
+        // System.out.println(response.getBody());
         String branchBlockId = block.getBranches().get(openaiIntent);
         if(branchBlockId != null) {
             return branchBlockId;
