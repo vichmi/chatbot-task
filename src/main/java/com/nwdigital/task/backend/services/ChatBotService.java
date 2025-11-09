@@ -13,7 +13,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -38,13 +37,21 @@ public class ChatBotService {
     @Autowired
     private ConversationHistoryRepository conversationHistoryRepository;
 
+    @Autowired
+    private org.springframework.core.io.ResourceLoader resourceLoader;
+
     private void initialize_flow() {
         if (this.flowRepo.count() > 0) {
             return;
         }
         try {
             ObjectMapper mapper = new ObjectMapper();
-            ClassPathResource resource = new ClassPathResource("flow.json");
+            org.springframework.core.io.Resource resource = resourceLoader.getResource("classpath:flow.json");
+            
+            if (!resource.exists()) {
+                throw new RuntimeException("flow.json not found in classpath");
+            }
+            
             ChatBotFlow flow = mapper.readValue(resource.getInputStream(), ChatBotFlow.class);
             this.flowRepo.save(flow);
         } catch (IOException e) {
