@@ -33,7 +33,7 @@ public class ChatBotService {
     private final Map<String, String> userStates = new HashMap<>();
     private String lastQuestion;
 
-    @Value("${OPENAI_SECRETKEY}")
+    @Value("${OPENAI_SECRETKEY:}")
     private String OPENAI_SECRETKEY;
 
     @Autowired

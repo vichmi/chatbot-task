@@ -58,12 +58,13 @@ public class ChatBotServiceTest {
     @Autowired
     private ConversationHistoryRepository conversationHistoryRepository;
 
-    @Autowired
-    private ChatBotService chatBotService;
-
+    
     @Value("${OPENAI_SECRETKEY:}")
     private String OPENAI_SECRETKEY;
-    
+
+    @Autowired
+    private ChatBotService chatBotService;
+   
 
     @BeforeEach
     void setupChatService() throws Exception {
