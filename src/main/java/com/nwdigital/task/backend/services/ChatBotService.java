@@ -13,6 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -38,7 +39,7 @@ public class ChatBotService {
     private ConversationHistoryRepository conversationHistoryRepository;
 
     @Autowired
-    private org.springframework.core.io.ResourceLoader resourceLoader;
+    private ResourceLoader resourceLoader;
 
     private void initialize_flow() {
         if (this.flowRepo.count() > 0) {
@@ -62,7 +63,6 @@ public class ChatBotService {
     public ChatBotService(ChatBotRepository flowRepo) {
         this.flowRepo = flowRepo;
         this.lastQuestion = "";
-        initialize_flow();
     }
 
     public String processMessage(String userId, String userMessage) {
