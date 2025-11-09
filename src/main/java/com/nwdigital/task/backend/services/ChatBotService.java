@@ -2,22 +2,18 @@ package com.nwdigital.task.backend.services;
 
 import org.springframework.http.*;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -48,11 +44,11 @@ public class ChatBotService {
         }
         try {
             ObjectMapper mapper = new ObjectMapper();
-            File flowFile = new File("src/main/resources/flow.json");
-            ChatBotFlow flow = mapper.readValue(flowFile, ChatBotFlow.class);
+            ClassPathResource resource = new ClassPathResource("flow.json");
+            ChatBotFlow flow = mapper.readValue(resource.getInputStream(), ChatBotFlow.class);
             this.flowRepo.save(flow);
         } catch (IOException e) {
-            throw new RuntimeException("Could not load flow.json", e);
+            throw new RuntimeException("Could not load flow.json: " + e.getMessage(), e);
         }
     }
 
