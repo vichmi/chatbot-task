@@ -1,7 +1,7 @@
 # Chat-bot
 
 ## Installation
-Clone the repo. \
+Clone the repo. 
 ```
 docker build -t chatbot-task .
 docker-compose up
