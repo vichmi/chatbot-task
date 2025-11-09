@@ -1,5 +1,5 @@
 # Chat-bot
-Description,........
+
 ## Base URL
 `http://localhost:8081/`
 
@@ -64,7 +64,7 @@ Response:
 
 #### WebSocket endpoint `ws://localhost:8081/chat`
 **Clien**t gets message with `/app/chat`, with argument message containtaing `{"content": 'message-text', "sender": 'user', "date": ''}`\
-**Server** sends message with `/topic/message`\
+**Server** sends message with `/topic/message`
 #### Example communcation using stomp.js
 ```javascript
 const stompClient = new StompJs.Client({
