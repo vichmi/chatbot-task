@@ -4,29 +4,27 @@ services:
   mongo:
     image: mongo:7
     container_name: mongo
-    restart: unless-stopped
     ports:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   app:
     build: .
     container_name: spring-app
     ports:
-      - "8080:8080"
+      - "8081:8081"
     environment:
-      SPRING_PROFILES_ACTIVE: docker
       MONGO_URI: mongodb://mongo:27017/chatbot
-      JAVA_OPTS: "-Xmx512m -Xms256m"
+      SPRING_PROFILES_ACTIVE: docker
     depends_on:
-      - mongo
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
+      mongo:
+        condition: service_healthy
 
 volumes:
   mongo-data:
