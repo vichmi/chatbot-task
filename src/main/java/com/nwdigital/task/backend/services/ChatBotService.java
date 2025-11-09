@@ -2,6 +2,8 @@ package com.nwdigital.task.backend.services;
 
 import org.springframework.http.*;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nwdigital.task.backend.models.Block;
 import com.nwdigital.task.backend.models.ChatBotFlow;
 import com.nwdigital.task.backend.models.ChatBotRepository;
@@ -39,12 +42,28 @@ public class ChatBotService {
     @Autowired
     private ConversationHistoryRepository conversationHistoryRepository;
 
+    private void initialize_flow() {
+        if (this.flowRepo.count() > 0) {
+            return;
+        }
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            File flowFile = new File("src/main/resources/flow.json");
+            ChatBotFlow flow = mapper.readValue(flowFile, ChatBotFlow.class);
+            this.flowRepo.save(flow);
+        } catch (IOException e) {
+            throw new RuntimeException("Could not load flow.json", e);
+        }
+    }
+
     public ChatBotService(ChatBotRepository flowRepo) {
         this.flowRepo = flowRepo;
         this.lastQuestion = "";
+        initialize_flow();
     }
 
     public String processMessage(String userId, String userMessage) {
+        initialize_flow();
         ChatBotFlow flow = flowRepo.findAll().get(0);
         String currentBlockId = userStates.getOrDefault(userId, flow.getStart_block_id());
         Block block = flow.getBlocks().stream()
