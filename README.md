@@ -1,5 +1,12 @@
 # Chat-bot
 
+## Installation
+Clone the repo. \
+```
+docker build -t chatbot-task .
+docker-compose up
+```
+
 ## Base URL
 `http://localhost:8081/api/v1`
 
