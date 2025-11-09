@@ -1,5 +1,5 @@
 {
-    "name": "Chat Bot",
+    "name": "Chat Bot3",
     "start_block_id": "greeting",
     "blocks": [
         {"id": "greeting", "type": "send_message", "message": "Hello, what are you looking for today?", "nextBlock": "wait_response_1"},
