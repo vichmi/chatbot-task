@@ -118,7 +118,7 @@ public class ChatBotServiceTest {
         mockFlow.setStart_block_id("start");
         mockFlow.setBlocks(Arrays.asList(startBlock, responseblock, intentBlock, timeBlock, weatherBlock, endBlock));
 
-        mockMvc.perform(post("/createConfig")
+        mockMvc.perform(post("/api/v1/createConfig")
             .contentType(MediaType.APPLICATION_JSON)
             .content(new ObjectMapper().writeValueAsString(mockFlow)))
             .andExpect(status().isOk());
@@ -143,7 +143,7 @@ public class ChatBotServiceTest {
 
     @Test
     void testGetMethod() throws Exception {
-        mockMvc.perform(get("/getConfig")
+        mockMvc.perform(get("/api/v1/getConfig")
         .contentType(MediaType.APPLICATION_JSON)
         .content(new ObjectMapper().writeValueAsString(chatBotRepository)))
         .andExpect(status().isOk());
@@ -181,7 +181,7 @@ public class ChatBotServiceTest {
         block.setId("weather_response");
         block.setMessage("studeno");
         LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm:ss");
         assertTrue(result.contains("Time is: " + now.format(formatter)));
         result = (String) method.invoke(chatBotService, block);
         assertTrue(result.contains("studeno"));
