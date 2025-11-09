@@ -23,7 +23,7 @@ import com.nwdigital.task.backend.models.Block;
 import com.nwdigital.task.backend.models.ChatBotFlow;
 import com.nwdigital.task.backend.models.ChatBotRepository;
 import com.nwdigital.task.backend.models.ConversationHistory;
-import com.nwdigital.task.backend.models.ConversationHistoryRepository;
+import com.nwdigital.task.backend.repository.ConversationHistoryRepository;
 import com.nwdigital.task.backend.models.Message;
 
 @Service
@@ -75,18 +75,21 @@ public class ChatBotService {
         String response = getDynamicMessage(block);
         if(block.getNextBlock() != null) {
             userStates.put(userId, block.getNextBlock());
+            this.lastQuestion = response;
             
             Block nextBlock = getBlockById(flow, block.getNextBlock());
             conversationHistoryRepository.insert(new ConversationHistory(new Message(response, "bot"), nextBlock));
             if(nextBlock != null) {
                 if(nextBlock.getType().equals("send_message")) {
+                    this.lastQuestion = response;
                     return response + "\n" + processBlock(userId, nextBlock, userMessage, flow);
                 }
                 else if(nextBlock.getType().equals("wait_response")) {
+                    this.lastQuestion = response;
                     return response;
                 }
                 else {
-                    // this.lastQuestion = response + "\n" + processBlock(userId, nextBlock, userMessage, flow); 
+                    this.lastQuestion = response + "\n" + processBlock(userId, nextBlock, userMessage, flow); 
                     return response + "\n" + processBlock(userId, nextBlock, userMessage, flow);
                 }
             }
@@ -158,7 +161,7 @@ public class ChatBotService {
             {
                 "model": "gpt-3.5-turbo",
                 "messages": [
-                    {"role": "system", "content": "You are a chatbot. When you cannot recognize the user's intent from the message, return 'misunderstood'. Here are the available intents: %s"},
+                    {"role": "system", "content": "You are a text classfier. Respond with ONE WORD that is the intent the user wants. Here are the available intents: %s"},
                     {"role": "assistant", "content": "%s"},
                     {"role": "user", "content": "%s"}
                 ]
