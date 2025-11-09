@@ -1,7 +1,7 @@
 # Chat-bot
 
 ## Base URL
-`http://localhost:8081/`
+`http://localhost:8081/api/v1`
 
 ## API documentation
 
