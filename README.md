@@ -4,7 +4,7 @@
 Clone the repo. 
 ```
 docker build -t chatbot-task .
-docker-compose up
+docker-compose up --build
 ```
 
 ## Base URL
