@@ -5,7 +5,16 @@ import java.util.Map;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 @Document
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Block {
     private String id;
     private String type;
@@ -14,17 +23,17 @@ public class Block {
     private List<String> intents;
     private Map<String, String> branches;
     
-    public String getId() {return this.id;}
-    public String getType() {return this.type;}
-    public String getMessage() {return this.message;}
-    public String getNextBlock() {return this.nextBlock;}
-    public List<String> getIntents() {return this.intents;}
-    public Map<String, String> getBranches() {return this.branches;}
+    // public String getId() {return this.id;}
+    // public String getType() {return this.type;}
+    // public String getMessage() {return this.message;}
+    // public String getNextBlock() {return this.nextBlock;}
+    // public List<String> getIntents() {return this.intents;}
+    // public Map<String, String> getBranches() {return this.branches;}
     
-    public void setId(String id) {this.id = id;}
-    public void setType(String type) {this.type = type;}
-    public void setMessage(String message) {this.message = message;}
-    public void setNextBlock(String nextBlock) {this.nextBlock = nextBlock;}
-    public void setIntents(List<String> intents) {this.intents = intents;}
-    public void setBranches(Map<String, String> branches) {this.branches = branches;}
+    // public void setId(String id) {this.id = id;}
+    // public void setType(String type) {this.type = type;}
+    // public void setMessage(String message) {this.message = message;}
+    // public void setNextBlock(String nextBlock) {this.nextBlock = nextBlock;}
+    // public void setIntents(List<String> intents) {this.intents = intents;}
+    // public void setBranches(Map<String, String> branches) {this.branches = branches;}
 }

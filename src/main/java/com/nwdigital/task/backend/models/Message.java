@@ -9,6 +9,14 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Data
+@AllArgsConstructor
 public class Message {
     private String content;
     
@@ -18,9 +26,9 @@ public class Message {
     
     private String sender;
     
-    public Message() {
-        this.date = LocalDateTime.now();
-    }
+    // public Message() {
+    //     this.date = LocalDateTime.now();
+    // }
 
     @JsonCreator
     public Message(
@@ -31,27 +39,27 @@ public class Message {
         this.sender = sender;
     }
 
-    public String getContent() {
-        return this.content;
-    }
+    // public String getContent() {
+    //     return this.content;
+    // }
 
-    public LocalDateTime getDate() {
-        return this.date;
-    }
+    // public LocalDateTime getDate() {
+    //     return this.date;
+    // }
 
-    public String getSender() {
-        return this.sender;
-    }
+    // public String getSender() {
+    //     return this.sender;
+    // }
 
-    public void setContent(String content) {
-        this.content = content;
-    }
+    // public void setContent(String content) {
+    //     this.content = content;
+    // }
 
-    public void setDate(LocalDateTime date) {
-        this.date = date;
-    }
+    // public void setDate(LocalDateTime date) {
+    //     this.date = date;
+    // }
 
-    public void setSender(String sender) {
-        this.sender = sender;
-    }
+    // public void setSender(String sender) {
+    //     this.sender = sender;
+    // }
 }

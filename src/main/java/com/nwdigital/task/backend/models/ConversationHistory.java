@@ -3,22 +3,33 @@ package com.nwdigital.task.backend.models;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 
 @Document(collection = "conversations")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ConversationHistory {
     @Id
     private String id;
 
     private Message message;
-    private Block block;
+    private String blockId;
 
-    public ConversationHistory(Message message, Block block) {
-        setMessage(message);
-        setBlock(block);
-    }
+    // public ConversationHistory(Message message, String blockId) {
+    //     this.message = message;
+    //     this.blockId = blockId;
+    // }
 
-    public Message getMessage() {return this.message;}
-    public Block getBlock() {return this.block;}
-    public void setMessage(Message newMessage) {this.message = newMessage;}
-    public void setBlock(Block block) {this.block = block;}
+    // public Message getMessage() {return this.message;}
+    // public String getBlockId() {return this.blockId;}
+    // public void setMessage(Message newMessage) {this.message = newMessage;}
+    // public void setBlockId(String blockId) {this.blockId = blockId;}
 }

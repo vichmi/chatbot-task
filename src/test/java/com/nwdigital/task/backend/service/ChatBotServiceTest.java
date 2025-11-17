@@ -39,8 +39,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nwdigital.task.backend.models.Block;
 import com.nwdigital.task.backend.models.ChatBotFlow;
-import com.nwdigital.task.backend.models.ChatBotRepository;
 import com.nwdigital.task.backend.models.ConversationHistory;
+import com.nwdigital.task.backend.repository.ChatBotRepository;
 import com.nwdigital.task.backend.repository.ConversationHistoryRepository;
 import com.nwdigital.task.backend.services.ChatBotService;
 

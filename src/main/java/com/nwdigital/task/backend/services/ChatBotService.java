@@ -19,10 +19,11 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nwdigital.client.OpenAIClient;
 import com.nwdigital.task.backend.models.Block;
 import com.nwdigital.task.backend.models.ChatBotFlow;
-import com.nwdigital.task.backend.models.ChatBotRepository;
 import com.nwdigital.task.backend.models.ConversationHistory;
+import com.nwdigital.task.backend.repository.ChatBotRepository;
 import com.nwdigital.task.backend.repository.ConversationHistoryRepository;
 import com.nwdigital.task.backend.models.Message;
 
@@ -41,7 +42,7 @@ public class ChatBotService {
     @Autowired
     private ResourceLoader resourceLoader;
 
-    private void initialize_flow() {
+    private void initializeFlow() {
         if (this.flowRepo.count() > 0) {
             return;
         }
@@ -66,7 +67,7 @@ public class ChatBotService {
     }
 
     public String processMessage(String userId, String userMessage) {
-        initialize_flow();
+        initializeFlow();
         ChatBotFlow flow = flowRepo.findAll().get(0);
         String currentBlockId = userStates.getOrDefault(userId, flow.getStart_block_id());
         Block block = flow.getBlocks().stream()
@@ -74,23 +75,24 @@ public class ChatBotService {
             .findFirst()
             .orElseThrow();
         Message usrMsg = new Message(userMessage, userId);
-        conversationHistoryRepository.insert(new ConversationHistory(usrMsg, block));
+        conversationHistoryRepository.insert(ConversationHistory.builder().message(usrMsg).blockId(block.getId()).build());
         return processBlock(userId, block, userMessage, flow);
     }
     
     private String processBlock(String userId, Block block, String userMessage, ChatBotFlow flow) {
-        if(block.getType().equals("send_message")) {
-            return handleSendMessage(userId, block, flow, userMessage);
+
+        switch(block.getType()) {
+            case "send_message":
+                return handleSendMessage(userId, block, flow, userMessage);
+            case "wait_response":
+                return handleWaitForResponse(userId, block, flow, userMessage);
+            case "recognize_intent":
+                return handleRecognizeIntent(userId, block, flow, userMessage);
+            case "end":
+                return handleEnd(userId, block);
+            case "misunderstood":
+                return "Unknown block" + block.getType();
         }
-        else if(block.getType().equals("wait_response")) {
-            return handleWaitForResponse(userId, block, flow, userMessage);
-        }
-        else if(block.getType().equals("recognize_intent")) {
-            return handleRecognizeIntent(userId, block, flow, userMessage);
-        }
-        else if(block.getType().equals("end")) {
-            return handleEnd(userId, block);
-        }else if(block.getType().equals("misunderstood")) {return handleMisUnderstand(userId, block);}
         return "Unknown block" + block.getType();
     }
     
@@ -101,7 +103,8 @@ public class ChatBotService {
             this.lastQuestion = response;
             
             Block nextBlock = getBlockById(flow, block.getNextBlock());
-            conversationHistoryRepository.insert(new ConversationHistory(new Message(response, "bot"), nextBlock));
+            // conversationHistoryRepository.insert(new ConversationHistory(new Message(response, "bot"), nextBlock.getId()));
+            conversationHistoryRepository.insert(ConversationHistory.builder().message(new Message(response, "bot")).blockId(block.getId()).build());
             if(nextBlock != null) {
                 if(nextBlock.getType().equals("send_message")) {
                     this.lastQuestion = response;
@@ -172,45 +175,13 @@ public class ChatBotService {
             return block.getNextBlock() != null ? block.getNextBlock() : "end";
         }
         String lowerMessage = userMessage.toLowerCase().trim();
-        try {
-            RestTemplate restTemplate = new RestTemplate();
-            HttpHeaders headers = new org.springframework.http.HttpHeaders();
-            headers.set("Authorization", "Bearer "+OPENAI_SECRETKEY);
-            headers.set("Content-Type", "application/json");
-            String intentsStr = String.join(", ", block.getIntents());
-            String requestBodyRaw = """
-                {
-                    "model": "gpt-3.5-turbo",
-                    "messages": [
-                        {"role": "system", "content": "You are a text classfier. Respond with ONE WORD that is the intent the user wants. Here are the available intents: %s"},
-                        {"role": "assistant", "content": "%s"},
-                        {"role": "user", "content": "%s"}
-                    ]
-                }
-            """.formatted(intentsStr, this.lastQuestion, lowerMessage);
-
-            byte[] bytes = requestBodyRaw.getBytes(StandardCharsets.UTF_8);
-            String requestBody = new String(bytes, StandardCharsets.UTF_8);
-            HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
-            ResponseEntity<String> response = restTemplate.exchange("https://api.openai.com/v1/chat/completions", HttpMethod.POST, entity, String.class);
-            JSONObject resBody = new JSONObject(response.getBody());
-            JSONArray choices = resBody.getJSONArray("choices");
-            String openaiIntent = choices.getJSONObject(0).getJSONObject("message").getString("content");
-            String branchBlockId = block.getBranches().get(openaiIntent);
-            if(branchBlockId != null) {
-                return branchBlockId;
-            }
-        }catch(HttpClientErrorException.Unauthorized e) {
-            for(String intent: block.getIntents()) {
-                if(lowerMessage.contains(intent.toLowerCase())) {
-                    String branchBlockId = block.getBranches().get(intent);
-                    if(branchBlockId != null) {
-                        return branchBlockId;
-                    }
-                }
-            }
+        
+        OpenAIClient openAIClient = new OpenAIClient(new RestTemplate());
+        String intentBlockId = openAIClient.callOpenAi(this.lastQuestion, lowerMessage, block);
+        if(intentBlockId != null) {
+            System.out.println(intentBlockId);
+            return intentBlockId;
         }
-
         return null;
     }
 
@@ -220,7 +191,8 @@ public class ChatBotService {
 
         userStates.put(userId, block.getId());
 
-        conversationHistoryRepository.insert(new ConversationHistory(new Message("I didn't understand that.", "bot"), block));
+        // conversationHistoryRepository.insert(new ConversationHistory(new Message("I didn't understand that.", "bot"), block.getId()));
+        conversationHistoryRepository.insert(ConversationHistory.builder().message(new Message("I didn't understand that.", "bot")).blockId(block.getId()).build());
 
         return "I didn't get that. Can you try again?";
     }
