@@ -1,4 +1,4 @@
-package com.nwdigital.client;
+package com.nwdigital.task.backend.client;
 
 import java.nio.charset.StandardCharsets;
 
@@ -16,6 +16,7 @@ import com.nwdigital.task.backend.models.Block;
 @Component
 public class OpenAIClient {
     private final RestTemplate restTemplate;
+    
     @Value("${OPENAI_SECRETKEY:}")
     private String OPENAI_SECRETKEY;
 
@@ -25,7 +26,6 @@ public class OpenAIClient {
 
     public String callOpenAi(String lastQuestion, String lowerMessage, Block block) {
         try {
-            RestTemplate restTemplate = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", "Bearer "+OPENAI_SECRETKEY);
             headers.set("Content-Type", "application/json");

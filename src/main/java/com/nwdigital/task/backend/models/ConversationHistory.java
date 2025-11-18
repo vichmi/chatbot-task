@@ -1,5 +1,8 @@
 package com.nwdigital.task.backend.models;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -20,8 +23,8 @@ public class ConversationHistory {
     @Id
     private String id;
 
-    private Message message;
-    private String blockId;
+    private String userId;
+    private List<Message> messages = new ArrayList<>();
 
     // public ConversationHistory(Message message, String blockId) {
     //     this.message = message;

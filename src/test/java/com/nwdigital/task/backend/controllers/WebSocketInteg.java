@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
@@ -23,6 +24,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
+import com.nwdigital.task.backend.config.WebSocketConfigTest;
 import com.nwdigital.task.backend.models.Message;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -30,7 +32,8 @@ import com.nwdigital.task.backend.models.Message;
     "spring.mongodb.embedded.version=3.5.5",
     "OPENAI_SECRETKEY=test-key"
 })
-public class WebSocketIntegrationTest {
+@Import(WebSocketConfigTest.class)
+public class WebSocketInteg {
    
     @LocalServerPort
     private int port;

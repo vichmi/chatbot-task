@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import javax.print.attribute.standard.Media;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -22,24 +21,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.springframework.http.MediaType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cglib.core.Local;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nwdigital.task.backend.client.OpenAIClient;
+import com.nwdigital.task.backend.config.WebSocketConfigTest;
 import com.nwdigital.task.backend.models.Block;
 import com.nwdigital.task.backend.models.ChatBotFlow;
-import com.nwdigital.task.backend.models.ConversationHistory;
 import com.nwdigital.task.backend.repository.ChatBotRepository;
 import com.nwdigital.task.backend.repository.ConversationHistoryRepository;
 import com.nwdigital.task.backend.services.ChatBotService;
@@ -47,6 +43,7 @@ import com.nwdigital.task.backend.services.ChatBotService;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Import(WebSocketConfigTest.class)
 public class ChatBotServiceTest {
 
     @Autowired
@@ -55,10 +52,12 @@ public class ChatBotServiceTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
+    @MockBean
     private ConversationHistoryRepository conversationHistoryRepository;
 
-    
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @Value("${OPENAI_SECRETKEY:}")
     private String OPENAI_SECRETKEY;
 
@@ -68,7 +67,6 @@ public class ChatBotServiceTest {
 
     @BeforeEach
     void setupChatService() throws Exception {
-        chatBotService = new ChatBotService(chatBotRepository);
         // Set the conversation history repository
         Field f = ChatBotService.class.getDeclaredField("conversationHistoryRepository");
         f.setAccessible(true);
@@ -121,7 +119,7 @@ public class ChatBotServiceTest {
 
         mockMvc.perform(post("/api/v1/createConfig")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(new ObjectMapper().writeValueAsString(mockFlow)))
+            .content(objectMapper.writeValueAsString(mockFlow)))
             .andExpect(status().isOk());
 
         chatBotRepository.deleteAll();

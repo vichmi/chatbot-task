@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Data
-@AllArgsConstructor
+@NoArgsConstructor
 public class Message {
     private String content;
     
@@ -25,10 +25,14 @@ public class Message {
     private LocalDateTime date;
     
     private String sender;
-    
-    // public Message() {
-    //     this.date = LocalDateTime.now();
-    // }
+    private String blockId;
+
+    public Message(String content, String sender, String blockId) {
+        this.content = content;
+        this.date = LocalDateTime.now();
+        this.sender = sender;
+        this.blockId = blockId;
+    }
 
     @JsonCreator
     public Message(
@@ -38,28 +42,4 @@ public class Message {
         this.date = LocalDateTime.now();
         this.sender = sender;
     }
-
-    // public String getContent() {
-    //     return this.content;
-    // }
-
-    // public LocalDateTime getDate() {
-    //     return this.date;
-    // }
-
-    // public String getSender() {
-    //     return this.sender;
-    // }
-
-    // public void setContent(String content) {
-    //     this.content = content;
-    // }
-
-    // public void setDate(LocalDateTime date) {
-    //     this.date = date;
-    // }
-
-    // public void setSender(String sender) {
-    //     this.sender = sender;
-    // }
 }

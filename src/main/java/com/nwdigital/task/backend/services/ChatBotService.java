@@ -1,25 +1,23 @@
 package com.nwdigital.task.backend.services;
-
-import org.springframework.http.*;
-
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nwdigital.client.OpenAIClient;
+import com.nwdigital.task.backend.client.OpenAIClient;
+import com.nwdigital.task.backend.exceptions.IntentNotRecognizedException;
 import com.nwdigital.task.backend.models.Block;
 import com.nwdigital.task.backend.models.ChatBotFlow;
 import com.nwdigital.task.backend.models.ConversationHistory;
@@ -40,21 +38,26 @@ public class ChatBotService {
     private ConversationHistoryRepository conversationHistoryRepository;
 
     @Autowired
+    private MongoTemplate mongoTemplate;
+
+    @Autowired
     private ResourceLoader resourceLoader;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     private void initializeFlow() {
         if (this.flowRepo.count() > 0) {
             return;
         }
         try {
-            ObjectMapper mapper = new ObjectMapper();
             org.springframework.core.io.Resource resource = resourceLoader.getResource("classpath:flow.json");
             
             if (!resource.exists()) {
                 throw new RuntimeException("flow.json not found in classpath");
             }
             
-            ChatBotFlow flow = mapper.readValue(resource.getInputStream(), ChatBotFlow.class);
+            ChatBotFlow flow = objectMapper.readValue(resource.getInputStream(), ChatBotFlow.class);
             this.flowRepo.save(flow);
         } catch (IOException e) {
             throw new RuntimeException("Could not load flow.json: " + e.getMessage(), e);
@@ -74,8 +77,9 @@ public class ChatBotService {
             .filter(b -> currentBlockId.equals(b.getId()))
             .findFirst()
             .orElseThrow();
-        Message usrMsg = new Message(userMessage, userId);
-        conversationHistoryRepository.insert(ConversationHistory.builder().message(usrMsg).blockId(block.getId()).build());
+        Message usrMsg = new Message(userMessage, userId, block.getId());
+        // conversationHistoryRepository.insert(ConversationHistory.builder().message(usrMsg).blockId(block.getId()).build());
+        saveMessage(userId, usrMsg);
         return processBlock(userId, block, userMessage, flow);
     }
     
@@ -101,10 +105,9 @@ public class ChatBotService {
         if(block.getNextBlock() != null) {
             userStates.put(userId, block.getNextBlock());
             this.lastQuestion = response;
-            
+        
             Block nextBlock = getBlockById(flow, block.getNextBlock());
-            // conversationHistoryRepository.insert(new ConversationHistory(new Message(response, "bot"), nextBlock.getId()));
-            conversationHistoryRepository.insert(ConversationHistory.builder().message(new Message(response, "bot")).blockId(block.getId()).build());
+            saveMessage(userId, new Message(response, "bot", block.getId()));
             if(nextBlock != null) {
                 if(nextBlock.getType().equals("send_message")) {
                     this.lastQuestion = response;
@@ -155,19 +158,18 @@ public class ChatBotService {
         if(userMessage == null || userMessage.trim().isEmpty()) {
             return "expected message";
         }
+        try {
+            String nextBlockId = detectIntent(block, userMessage);
+            Block nextBlock = getBlockById(flow, nextBlockId);
 
-        String nextBlockId = detectIntent(block, userMessage);
-
-        if(nextBlockId == null) {
+            if(nextBlock == null) {
+                return handleMisUnderstand(userId, block);
+            }
+            userStates.put(userId, nextBlockId);
+            return processBlock(userId, nextBlock, userMessage, flow);
+        } catch (IntentNotRecognizedException e) {
             return handleMisUnderstand(userId, block);
         }
-        Block nextBlock = getBlockById(flow, nextBlockId);
-
-        if(nextBlock == null) {
-            return handleMisUnderstand(userId, block);
-        }
-        userStates.put(userId, nextBlockId);
-        return processBlock(userId, nextBlock, userMessage, flow);
     }
 
     private String detectIntent(Block block, String userMessage) {
@@ -182,7 +184,7 @@ public class ChatBotService {
             System.out.println(intentBlockId);
             return intentBlockId;
         }
-        return null;
+        throw new IntentNotRecognizedException("Couldn't determine user message: " + userMessage);
     }
 
 
@@ -192,9 +194,10 @@ public class ChatBotService {
         userStates.put(userId, block.getId());
 
         // conversationHistoryRepository.insert(new ConversationHistory(new Message("I didn't understand that.", "bot"), block.getId()));
-        conversationHistoryRepository.insert(ConversationHistory.builder().message(new Message("I didn't understand that.", "bot")).blockId(block.getId()).build());
-
-        return "I didn't get that. Can you try again?";
+        // conversationHistoryRepository.insert(ConversationHistory.builder().message(new Message("I didn't understand that.", "bot")).blockId(block.getId()).build());
+        Message botMessage = new Message("I didn't get that. Can you try again?", "bot", block.getId());
+        saveMessage(userId, botMessage);
+        return botMessage.getContent();
     }
 
     private String handleEnd(String userId, Block block) {
@@ -218,4 +221,11 @@ public class ChatBotService {
     }
 
     public String getLastQuestion() {return this.lastQuestion;}
+
+    private void saveMessage(String userId, Message message) {
+        Query query = new Query(Criteria.where("userId").is(userId));
+        Update update = new Update().push("messages", message);
+        mongoTemplate.upsert(query, update, ConversationHistory.class);
+
+    }
 }

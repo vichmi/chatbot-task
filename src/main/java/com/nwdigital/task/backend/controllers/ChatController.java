@@ -44,6 +44,7 @@ public class ChatController {
                 username = sessionId;
             }
             sessionToUsername.put(sessionId, username);
+            
             String greeting = this.chatBot.processMessage(sessionId, "");
             messaginTemplate.convertAndSend("/topic/message", new Message(greeting, "bot"));
         }
